@@ -15,6 +15,7 @@ The app uses Open-Meteo and does not need an API key. Commands below assume Ubun
    - SSH (TCP 22) only from your own IP address.
    - HTTP (TCP 80) from `0.0.0.0/0` and, if using IPv6, `::/0`.
    - HTTPS (TCP 443) from `0.0.0.0/0` and, if using IPv6, `::/0`.
+   - Later go to the security group and add port 3000
 3. At your DNS provider, create an `A` record for your domain pointing to the instance's Elastic IP. If you also want `www`, create a `CNAME` record for `www` pointing to your domain (or an equivalent `A` record). Add an `AAAA` record only if the instance is configured with a working public IPv6 address. DNS changes can take time to propagate.
 4. Connect to the instance using the Ubuntu AMI's default login user:
 
@@ -59,28 +60,21 @@ npm test
 
 ## 4. Create the systemd service
 
-Create `/etc/systemd/system/weather.service`:
+Create sudo vim `/etc/systemd/system/weather-app.service`:
 
 ```ini
 [Unit]
 Description=Skyline Weather application
-After=network-online.target
-Wants=network-online.target
+After=network.target
 
 [Service]
-Type=simple
-User=weather
-Group=weather
-WorkingDirectory=/opt/weather/app
+User=ubuntu
+WorkingDirectory=/home/ubuntu/weather-application-2026
 Environment=NODE_ENV=production
 Environment=PORT=3000
-ExecStart=/usr/bin/node /opt/weather/app/server.js
-Restart=on-failure
+ExecStart=/usr/bin/node server.js
+Restart=always
 RestartSec=5
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectHome=true
-ProtectSystem=strict
 
 [Install]
 WantedBy=multi-user.target
@@ -90,8 +84,9 @@ Load the service and start it at boot:
 
 ```sh
 sudo systemctl daemon-reload
-sudo systemctl enable --now weather
-sudo systemctl status weather --no-pager
+sudo systemctl enable weather-app
+sudo systemctl start weather-app
+sudo systemctl status weather-app
 ```
 
 Check the local app response before configuring the public proxy:
@@ -104,21 +99,20 @@ The Node server listens on port 3000. Do not open this port in the EC2 security 
 
 ## 5. Configure Nginx for your domain
 
-Create `/etc/nginx/sites-available/weather` and replace both instances of `weather.example.com` with your domain:
+sudo vim `/etc/nginx/sites-available/weather-app` and replace both instances of `weather.example.com` with your domain:
 
 ```nginx
 server {
     listen 80;
-    listen [::]:80;
-    server_name weather.example.com www.weather.example.com;
+    server_name weatherapp.devopsghost.name.ng;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $'upgrade';
+        proxy_cache_bypass $http_upgrade;
     }
 }
 ```
@@ -128,7 +122,7 @@ If you are not using `www`, remove `www.weather.example.com` from `server_name` 
 Enable the site, validate the Nginx configuration, and reload Nginx:
 
 ```sh
-sudo ln -s /etc/nginx/sites-available/weather /etc/nginx/sites-enabled/weather
+sudo ln -s /etc/nginx/sites-available/weather-app /etc/nginx/sites-enabled/weather-app
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -150,14 +144,7 @@ sudo apt install -y certbot python3-certbot-nginx
 Request and install a certificate. Replace the email address and domain names:
 
 ```sh
-sudo certbot --nginx \
-  -d weather.example.com \
-  -d www.weather.example.com \
-  --redirect \
-  --agree-tos \
-  --no-eff-email \
-  --email you@example.com
-```
+sudo certbot --nginx -d weatherapp.devopsghost.name.ng
 
 If you are not using `www`, omit its `-d` option. Certbot configures Nginx to serve HTTPS and redirect HTTP to HTTPS. Check renewal:
 
