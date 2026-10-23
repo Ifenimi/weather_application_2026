@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101827">
+    <meta
+      name="description"
+      content="A beautiful, up-to-date weather forecast for cities around the world."
+    >
+    <title>Skyline — Weather, wherever you are</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Skyline home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 36 36" fill="none">
+              <path d="M8 24.5 15.1 12l4.2 7.2 3.1-4.9L30 27H8v-2.5Z" fill="currentColor"/>
+              <circle cx="25.5" cy="10.5" r="3.5" fill="#F7C873"/>
+            </svg>
+          </span>
+          <span>skyline<span class="brand-period">.</span></span>
+        </a>
+
+        <form class="search-form" id="search-form" role="search">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="10.8" cy="10.8" r="6.3" stroke="currentColor" stroke-width="1.7"/>
+            <path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+          <label class="sr-only" for="city-search">Search for a city</label>
+          <input
+            id="city-search"
+            name="city"
+            type="search"
+            placeholder="Search any city..."
+            autocomplete="off"
+            required
+          >
+          <button class="search-button" type="submit">Search</button>
+        </form>
+
+        <div class="topbar-actions">
+          <button class="location-button" id="location-button" type="button" aria-label="Use my location">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M19 10.2c0 5.1-7 10.1-7 10.1S5 15.3 5 10.2a7 7 0 1 1 14 0Z" stroke="currentColor" stroke-width="1.6"/>
+              <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+            <span>My location</span>
+          </button>
+          <div class="unit-toggle" role="group" aria-label="Temperature units">
+            <button class="unit-button is-active" data-unit="celsius" type="button" aria-pressed="true">°C</button>
+            <button class="unit-button" data-unit="fahrenheit" type="button" aria-pressed="false">°F</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">YOUR DAILY FORECAST</p>
+            <h1>Weather, wherever you are<span class="heading-period">.</span></h1>
+          </div>
+          <div class="updated-label" id="updated-label">
+            <span class="live-dot"></span>
+            <span>Getting the latest</span>
+          </div>
+        </div>
+
+        <div class="status-message" id="status-message" role="status" aria-live="polite" hidden></div>
+
+        <section class="weather-layout" aria-label="Weather forecast">
+          <article class="current-card" id="current-card" aria-label="Current weather">
+            <div class="card-orb card-orb-one"></div>
+            <div class="card-orb card-orb-two"></div>
+            <div class="current-topline">
+              <div class="place-wrap">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M19 10.2c0 5.1-7 10.1-7 10.1S5 15.3 5 10.2a7 7 0 1 1 14 0Z" stroke="currentColor" stroke-width="1.7"/>
+                  <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.7"/>
+                </svg>
+                <div>
+                  <h2 id="city-name">London</h2>
+                  <p id="city-region">United Kingdom</p>
+                </div>
+              </div>
+              <span class="today-pill" id="today-label">TODAY</span>
+            </div>
+
+            <div class="current-weather">
+              <div class="temperature-wrap">
+                <p class="weather-description" id="weather-description">Partly cloudy</p>
+                <div class="temperature" id="current-temperature">--<span>°</span></div>
+                <p class="feels-like" id="feels-like">Feels like --°</p>
+              </div>
+              <div class="weather-art" id="weather-art" aria-hidden="true"></div>
+            </div>
+
+            <div class="card-divider"></div>
+            <div class="current-footer">
+              <div class="sun-detail">
+                <span class="detail-icon" aria-hidden="true">↗</span>
+                <div><span class="detail-label">SUNRISE</span><strong id="sunrise">--:--</strong></div>
+              </div>
+              <div class="sun-detail">
+                <span class="detail-icon sunset-icon" aria-hidden="true">↘</span>
+                <div><span class="detail-label">SUNSET</span><strong id="sunset">--:--</strong></div>
+              </div>
+              <span class="timezone-label" id="timezone-label">LOCAL TIME</span>
+            </div>
+          </article>
+
+          <aside class="details-panel" aria-label="Weather details">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">AT A GLANCE</p>
+                <h2>Today’s details</h2>
+              </div>
+              <span class="panel-sparkle" aria-hidden="true">✳</span>
+            </div>
+            <div class="detail-grid">
+              <article class="detail-card">
+                <div class="detail-card-top"><span class="detail-symbol humidity-symbol">◉</span><span class="detail-label">HUMIDITY</span></div>
+                <strong class="detail-value" id="humidity">--<span>%</span></strong>
+                <span class="detail-caption">Relative humidity</span>
+              </article>
+              <article class="detail-card">
+                <div class="detail-card-top"><span class="detail-symbol wind-symbol">〰</span><span class="detail-label">WIND</span></div>
+                <strong class="detail-value" id="wind-speed">--<span> km/h</span></strong>
+                <span class="detail-caption">Steady breeze</span>
+              </article>
+              <article class="detail-card">
+                <div class="detail-card-top"><span class="detail-symbol rain-symbol">⌁</span><span class="detail-label">PRECIPITATION</span></div>
+                <strong class="detail-value" id="precipitation">--<span> mm</span></strong>
+                <span class="detail-caption">So far today</span>
+              </article>
+              <article class="detail-card">
+                <div class="detail-card-top"><span class="detail-symbol uv-symbol">☼</span><span class="detail-label">UV INDEX</span></div>
+                <strong class="detail-value" id="uv-index">--</strong>
+                <span class="detail-caption" id="uv-caption">Peak for today</span>
+              </article>
+            </div>
+          </aside>
+        </section>
+
+        <section class="forecast-section" aria-labelledby="hourly-heading">
+          <div class="section-title-row">
+            <div>
+              <p class="eyebrow">THE NEXT 24 HOURS</p>
+              <h2 id="hourly-heading">Hourly forecast</h2>
+            </div>
+            <span class="forecast-note">Local time</span>
+          </div>
+          <div class="hourly-track" id="hourly-forecast" aria-live="polite"></div>
+        </section>
+
+        <section class="forecast-section weekly-section" aria-labelledby="daily-heading">
+          <div class="section-title-row">
+            <div>
+              <p class="eyebrow">PLAN AHEAD</p>
+              <h2 id="daily-heading">5-day forecast</h2>
+            </div>
+          </div>
+          <div class="daily-list" id="daily-forecast" aria-live="polite"></div>
+        </section>
+
+        <footer class="page-footer">
+          <span>Forecasts for wherever life takes you.</span>
+          <span>Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a></span>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
